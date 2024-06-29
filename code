@@ -1,0 +1,62 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract ExpenseManager {
+    address public owner;
+    uint public totalIncome;
+    uint public totalExpense;
+    uint public netSavings;
+
+    event IncomeAdded(address indexed account, uint amount);
+    event ExpenseAdded(address indexed account, uint amount);
+    event SavingsUpdated(uint newSavings);
+
+    constructor() {
+        owner = msg.sender;
+        netSavings = 0;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Unauthorized");
+        _;
+    }
+
+    function addIncome(uint amount) public onlyOwner {
+        require(amount > 0, "Amount must be positive");
+        if (totalIncome + amount > 1000) revert("Income exceeds taxless limit: Tax Applied");
+
+        totalIncome += amount;
+        netSavings += amount;
+
+        emit IncomeAdded(msg.sender, amount);
+        emit SavingsUpdated(netSavings);
+
+        assert(netSavings >= totalIncome);
+    }
+
+    function addExpense(uint amount) public onlyOwner {
+        require(amount > 0, "Amount must be positive");
+        require(netSavings >= amount, "Insufficient savings");
+        if (totalExpense + amount > 5000) revert("Expense exceeds limit");
+
+        totalExpense += amount;
+        netSavings -= amount;
+
+        emit ExpenseAdded(msg.sender, amount);
+        emit SavingsUpdated(netSavings);
+
+        assert(netSavings >= 0);
+    }
+
+    function getSavings() public view returns (uint) {
+        return netSavings;
+    }
+
+    function forbid_action() public pure {
+        revert("Operation not allowed");
+    }
+
+    function verifyAccess() public view onlyOwner {
+        forbid_action();
+    }
+}
