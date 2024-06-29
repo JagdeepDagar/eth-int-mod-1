@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract ExpenseManager {
+contract Mycontract {
     address public owner;
     uint public totalIncome;
     uint public totalExpense;
